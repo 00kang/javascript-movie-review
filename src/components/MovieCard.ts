@@ -27,7 +27,7 @@ export default class MovieCard {
        <div class="item-card">
          <img
            class="item-thumbnail"
-           src="https:image.tmdb.org/t/p/w220_and_h330_face${movie.poster_path}"
+           src="src="https://image.tmdb.org/t/p/w500${movie.poster_path}"
            loading="lazy"
            alt="${movie.title}"
          />
