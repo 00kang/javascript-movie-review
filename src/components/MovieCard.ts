@@ -24,7 +24,9 @@ export default class MovieCard {
 
   /* eslint-disable max-lines-per-function */
   #generateMovieItem(movie: Movie) {
-    const posterPath = movie.poster_path ? `https:image.tmdb.org/t/p/w220_and_h330_face${movie.poster_path}` : NoImage;
+    const posterPath = movie.poster_path
+      ? `https://image.tmdb.org/t/p/w220_and_h330_face${movie.poster_path}`
+      : NoImage;
     const element = /* html */ `
     <a href="#">
        <div class="item-card">
