@@ -1,11 +1,13 @@
 import { Movie } from './index.d';
+
+import { SKELETON_UI_FIXED } from './constants';
+
 import MoreButton from './components/MoreButton';
 import MovieCard from './components/MovieCard';
 import movieStore from './store/MovieStore';
 import SearchBox from './components/SearchBox';
 import searchMovieStore from './store/SearchMovieStore';
 
-const SKELETON_UI_FIXED = 8; // 스켈레톤 UI 갯수
 type Tpage = 'popular' | 'search';
 
 export default class App {
@@ -17,29 +19,27 @@ export default class App {
     this.#addHomeButtonEvent();
   }
 
-  async #generateMovieList() {
-    this.#changeTitle('지금 인기 있는 영화');
-    this.#removePreviousError();
-    const ulElement = document.querySelector('ul.item-list');
-
-    if (ulElement) {
-      this.#generateSkeletonUI(ulElement as HTMLElement);
-      const newData = await movieStore.getMovies(); //
-
-      this.#removeSkeletonUI();
-      this.#appendMovieCard(newData, ulElement as HTMLElement);
-    }
+  #generateMovieList() {
+    this.#generateItemList('지금 인기 있는 영화', async () => await movieStore.getMovies(), movieStore);
   }
 
-  async #generateSearchMovieList() {
-    this.#changeTitle(`"${searchMovieStore.query}"  검색 결과`);
+  #generateSearchMovieList() {
+    this.#generateItemList(
+      `"${searchMovieStore.query}"  검색 결과`,
+      async () => await searchMovieStore.searchMovies(),
+      searchMovieStore,
+    );
+  }
+
+  // eslint-disable-next-line max-lines-per-function
+  async #generateItemList(title: string, fetchData: () => Promise<Movie[]>, store: any) {
+    this.#changeTitle(title);
     this.#removePreviousError();
     const ulElement = document.querySelector('ul.item-list');
 
     if (ulElement) {
       this.#generateSkeletonUI(ulElement as HTMLElement);
-      const newData = await searchMovieStore.searchMovies();
-
+      const newData = await fetchData();
       this.#removeSkeletonUI();
       this.#appendMovieCard(newData, ulElement as HTMLElement);
     }
@@ -47,6 +47,7 @@ export default class App {
 
   #changeTitle(title: string) {
     const h2Element = document.querySelector('h2');
+
     if (h2Element) {
       h2Element.textContent = title;
     }
@@ -60,18 +61,25 @@ export default class App {
 
       ulElement?.appendChild(card.element);
     });
+
     this.#generateMoreButton();
   }
 
+  // eslint-disable-next-line max-lines-per-function
   #generateSkeletonUI(ulElement: HTMLElement) {
     this.#removeMoreButton();
+
+    const fragment = new DocumentFragment();
+
     for (let i = 0; i < SKELETON_UI_FIXED; i++) {
       const card = new MovieCard({
         classes: ['skeleton-container'],
       });
 
-      ulElement?.appendChild(card.element);
+      fragment.appendChild(card.element);
     }
+
+    ulElement?.appendChild(fragment);
   }
 
   #removeSkeletonUI() {
@@ -87,8 +95,11 @@ export default class App {
   /* eslint-disable max-lines-per-function */
   #generateMoreButton() {
     this.#removeMoreButton();
+
     if (searchMovieStore.presentPage === searchMovieStore.totalPages) return;
+
     const itemView = document.querySelector('section.item-view');
+
     const moreBtn = new MoreButton({
       onClick: () => {
         if (this.#pageType === 'popular') {
@@ -122,8 +133,9 @@ export default class App {
   #generateSearchBox() {
     const header = document.querySelector('header');
     const ulElement = document.querySelector('ul.item-list');
+
     const searchBox = new SearchBox({
-      onClick: (query: string) => {
+      searchInputSubmit: (query: string) => {
         if (ulElement) ulElement.innerHTML = '';
         this.#pageType = 'search';
         searchMovieStore.query = query;
@@ -150,13 +162,12 @@ export default class App {
 
   #renderAllMovieList() {
     const movieDatas = movieStore.movies;
-    if (!(movieDatas.length === 0)) {
-      const ulElement = document.querySelector('ul.item-list');
+    if (movieDatas.length === 0) return;
 
-      if (ulElement) {
-        ulElement.innerHTML = '';
-        this.#appendMovieCard(movieDatas, ulElement as HTMLElement);
-      }
-    }
+    const ulElement = document.querySelector('ul.item-list');
+    if (!ulElement) return;
+
+    ulElement.innerHTML = '';
+    this.#appendMovieCard(movieDatas, ulElement as HTMLElement);
   }
 }

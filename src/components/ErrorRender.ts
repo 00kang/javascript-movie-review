@@ -1,5 +1,6 @@
-/* eslint-disable max-lines-per-function */
-export default class ErrorPage {
+import { ERROR_2XX, ERROR_4XX, ERROR_5XX } from '../constants';
+
+export default class ErrorRender {
   #errorPageElement = document.createElement('div');
 
   #status: string = '';
@@ -15,9 +16,9 @@ export default class ErrorPage {
   }
 
   renderError() {
-    if (this.#status[0] === '2') this.#renderNoResult();
-    if (this.#status[0] === '4') this.#renderClientError();
-    if (this.#status[0] === '5') this.#renderServerError();
+    if (this.#status[0] === ERROR_2XX) this.#renderNoResult();
+    if (this.#status[0] === ERROR_4XX) this.#renderClientError();
+    if (this.#status[0] === ERROR_5XX) this.#renderServerError();
   }
 
   #renderNoResult() {
