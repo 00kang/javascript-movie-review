@@ -17,7 +17,6 @@ export default class SearchBox {
 
   #generateInput() {
     const input = document.createElement('input');
-
     input.type = 'text';
     input.placeholder = '검색';
     input.name = 'query';
